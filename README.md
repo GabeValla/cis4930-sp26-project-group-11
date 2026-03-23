@@ -16,3 +16,6 @@ Data source: https://www.talgov.com/gis/tops/
 * Does crime change over time in relation to month/year?
 * Which areas have the highest crime rates?
 
+
+# Plots
+<img width="1484" height="584" alt="incidents_over_time" src="https://github.com/user-attachments/assets/cbf65dea-353b-43f4-aa48-a7bbbf402998" />
