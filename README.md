@@ -12,7 +12,7 @@ Our dataset is pulled from Tallahassee Online Police Statistics (TOPS), a City o
 Data source: https://www.talgov.com/gis/tops/
 
 # Research Questions:
-Which types of crimes are the most common?
-Does crime change over time in relation to month/year?
-Which areas have the highest crime rates?
+* Which types of crimes are the most common?
+* Does crime change over time in relation to month/year?
+* Which areas have the highest crime rates?
 
