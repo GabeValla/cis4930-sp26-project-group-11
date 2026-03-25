@@ -8,7 +8,7 @@ Real World Data Storytelling
 * Liam Kandel
 
 # Data Set
-Our dataset is pulled from Tallahassee Online Police Statistics (TOPS), a City of Tallahassee website that collects 911 calls. The data shows time of incident, reason for call, location, latitude and longitude. 
+Our dataset is pulled from Tallahassee Online Police Statistics (TOPS), a City of Tallahassee website that collects 911 calls. The data shows time of incident, reason for call, location, latitude and longitude. The data fits the requirements because it has four numeric columns (date, time, longitude, latitude) as well as two categorical columns (reason for call and location). The dataset contains approximately 163,722 rows, which exceeds the minimum requirement of 500 rows. This larger dataset allows for more meaningful analysis and better identification of patterns and trends in crime data.
 Data source: https://www.talgov.com/gis/tops/
 
 # Research Questions:
