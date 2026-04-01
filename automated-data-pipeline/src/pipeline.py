@@ -23,6 +23,8 @@ def main():
             temp_max = result["temp_max"]
             temp_min = result["temp_min"]
             precipitation = result["precipitation"]
+            wind_speed_max = result["wind_speed_max"]
+            precip_prob_max = result["precip_prob_max"]
 
             # Create a row for each date in the API response
             for i in range(len(dates)):
@@ -31,7 +33,9 @@ def main():
                     "date": dates[i],
                     "temp_max": temp_max[i],
                     "temp_min": temp_min[i],
-                    "precipitation": precipitation[i]
+                    "precipitation": precipitation[i],
+                    "wind_speed_max": wind_speed_max[i],
+                    "precip_prob_max": precip_prob_max[i]
                 }
                 all_rows.append(row)
 
