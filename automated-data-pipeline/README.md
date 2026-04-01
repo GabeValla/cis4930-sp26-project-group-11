@@ -38,6 +38,14 @@ Saved data to data/processed/weather_data.csv
 Pipeline complete. 21 rows processed.
 ```
 
+## Data Analysis (Extra Credit)
+To satisfy the optional stretch goal, we included a Jupyter Notebook (`analysis.ipynb`) that runs an Exploratory Data Analysis (EDA) on the `weather_data.csv` file. 
+The notebook:
+- Checks out the dataset using `pandas`.
+- Drops duplicates that inherently appear when re-running the automated pipeline to ensure data integrity during graphing.
+- Generates a chronological line graph tracking the **Maximum Temperature Over Time** for the 3 Florida cities.
+- Generates a dashed chronological line graph mapping out **Daily Precipitation**.
+
 ## Automation Hook
 To schedule this pipeline to run automatically every day at 8:00 AM, you could add the following cron job to your system (macOS/Linux):
 
