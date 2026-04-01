@@ -7,7 +7,7 @@ def fetch_weather(city_name, latitude, longitude):
     params = {
         "latitude": latitude,
         "longitude": longitude,
-        "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum",
+        "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,precipitation_probability_max",
         "timezone": "auto"
     }
 
@@ -22,7 +22,9 @@ def fetch_weather(city_name, latitude, longitude):
             "dates": data.get("daily", {}).get("time", []),
             "temp_max": data.get("daily", {}).get("temperature_2m_max", []),
             "temp_min": data.get("daily", {}).get("temperature_2m_min", []),
-            "precipitation": data.get("daily", {}).get("precipitation_sum", [])
+            "precipitation": data.get("daily", {}).get("precipitation_sum", []),
+            "wind_speed_max": data.get("daily", {}).get("wind_speed_10m_max", []),
+            "precip_prob_max": data.get("daily", {}).get("precipitation_probability_max", [])
         }
     # Handle potential exceptions during the API request
     except requests.exceptions.Timeout:
