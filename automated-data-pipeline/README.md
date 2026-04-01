@@ -46,6 +46,11 @@ The notebook:
 - Generates a chronological line graph tracking the **Maximum Temperature Over Time** for the 3 Florida cities.
 - Generates a dashed chronological line graph mapping out **Daily Precipitation**.
 
+* Data taken as of 03/31/2026
+<img width="990" height="590" alt="daily_precipitation" src="https://github.com/user-attachments/assets/2183e6a0-88e7-4a59-8ff5-723a171437d1" />
+<img width="989" height="590" alt="max_temp_over_time" src="https://github.com/user-attachments/assets/87f4058e-ab07-4c93-9faa-a56679b0fbdf" />
+
+
 ## Automation Hook
 To schedule this pipeline to run automatically every day at 8:00 AM, you could add the following cron job to your system (macOS/Linux):
 
