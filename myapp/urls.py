@@ -9,4 +9,5 @@ urlpatterns = [
     path('records/<int:pk>/edit/', views.record_edit, name='record_edit'),
     path('records/<int:pk>/delete/', views.record_delete, name='record_delete'),
     path('analytics/', views.analytics, name='analytics'),
+    path('api/trigger-fetch/', views.trigger_fetch, name='trigger_fetch'),
 ]

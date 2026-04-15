@@ -7,9 +7,7 @@ pip install -r requirements.txt
 # Compile static files securely
 python manage.py collectstatic --no-input
 
-# Apply DB migrations into Postgres
+# Apply DB migrations
 python manage.py migrate
 
-# Seed baseline data
-python manage.py seed_data --limit 10000
-python manage.py fetch_data
+# Seeding is skipped because the seeded db.sqlite3 is tracked in git!
