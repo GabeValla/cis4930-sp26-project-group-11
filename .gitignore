@@ -1,7 +1,4 @@
 venv
-runtime.txt
-Procfile
-.env.example
 .DS_Store
 .env
 db.sqlite3
