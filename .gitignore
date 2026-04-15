@@ -1,2 +1,10 @@
 venv
-*.txt
+runtime.txt
+Procfile
+.env.example
+.DS_Store
+.env
+db.sqlite3
+staticfiles/
+__pycache__/
+*.pyc

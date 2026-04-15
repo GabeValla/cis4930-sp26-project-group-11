@@ -1,0 +1,23 @@
+{% extends 'myapp/base.html' %}
+{% load bootstrap5 %}
+
+{% block title %}{{ title }} - TallyStats{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-3">
+    <div class="col-md-8 col-lg-6">
+        <div class="card card-custom p-4">
+            <h3 class="mb-4">{{ title }}</h3>
+            <form method="post" action="" novalidate>
+                {% csrf_token %}
+                {% bootstrap_form form %}
+                
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary-custom text-white w-100">Save Incident</button>
+                    <a href="{% url 'records_list' %}" class="btn btn-outline-secondary w-100">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

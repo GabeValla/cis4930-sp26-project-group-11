@@ -1,0 +1,149 @@
+{% extends 'myapp/base.html' %}
+{% load custom_filters %}
+
+{% block title %}Analytics Dashboard - TallyStats{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Analytics Dashboard</h2>
+</div>
+
+<div class="row">
+    <!-- Chart 1: Top 10 Crime Reasons -->
+    <div class="col-lg-6 mb-4">
+        <div class="card card-custom h-100 p-3">
+            <h5 class="mb-3 text-center">Top 10 Incident Types</h5>
+            <div style="position: relative; height:350px; width:100%">
+                <canvas id="reasonsChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Chart 2: Crime Heatmap -->
+    <div class="col-lg-6 mb-4">
+        <div class="card card-custom h-100 p-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0 text-center">Geospatial Incident Data</h5>
+                <select id="monthSelector" class="form-select w-auto form-select-sm">
+                    {% for month in available_months %}
+                        <option value="{{ month }}" {% if month == 'All' %}selected{% endif %}>
+                            {% if month == 'All' %}All Time{% else %}{{ month }}{% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="heatmap" style="position: relative; height:350px; width:100%; border-radius: 8px; z-index: 1;"></div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card card-custom p-4">
+            <h5 class="mb-4">Weather Summary Statistics</h5>
+            <div class="table-responsive">
+                <table class="table table-custom table-striped">
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Max Temp (°C)</th>
+                            <th>Min Temp (°C)</th>
+                            <th>Precipitation (mm)</th>
+                            <th>Max Wind Speed (km/h)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for index in "count mean std min 25% 50% 75% max"|space_split %}
+                        <tr>
+                            <td class="fw-bold">{{ index|title }}</td>
+                            <td>{{ summary_stats.temp_max|get_item:index|default:"-" }}</td>
+                            <td>{{ summary_stats.temp_min|get_item:index|default:"-" }}</td>
+                            <td>{{ summary_stats.precipitation|get_item:index|default:"-" }}</td>
+                            <td>{{ summary_stats.wind_speed_max|get_item:index|default:"-" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const topReasonsData = JSON.parse('{{ top_reasons_json|safe }}');
+        const heatDataByMonth = JSON.parse('{{ heatmap_data_by_month_json|safe }}');
+        
+        // Context colors based on our custom styling palette
+        const primaryColor = '#2c3e50';
+        const secondaryColor = '#18bc9c';
+        const redColor = '#e74c3c';
+        const orangeColor = '#f39c12';
+        
+        // 1. Render Pie Chart for Top Reasons
+        const ctxReasons = document.getElementById('reasonsChart').getContext('2d');
+        new Chart(ctxReasons, {
+            type: 'doughnut',
+            data: {
+                labels: topReasonsData.labels,
+                datasets: [{
+                    label: 'Incident Count',
+                    data: topReasonsData.values,
+                    backgroundColor: [
+                        primaryColor, secondaryColor, redColor, orangeColor, 
+                        '#8e44ad', '#3498db', '#f1c40f', '#1abc9c', '#95a5a6', '#d35400'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    }
+                }
+            }
+        });
+        
+        // 2. Render Heatmap Instead of Line Chart
+        var map = L.map('heatmap').setView([30.4383, -84.2807], 11);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            maxZoom: 18,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        }).addTo(map);
+        
+        var currentHeatLayer = null;
+
+        function updateHeatmap(monthKey) {
+            if (currentHeatLayer) {
+                map.removeLayer(currentHeatLayer);
+            }
+            const dataToRender = heatDataByMonth[monthKey] || [];
+            currentHeatLayer = L.heatLayer(dataToRender, {
+                radius: 18, 
+                blur: 20, 
+                maxZoom: 15
+            }).addTo(map);
+        }
+
+        // Initialize with default selection
+        const monthSelector = document.getElementById('monthSelector');
+        updateHeatmap(monthSelector.value);
+
+        // Listen for changes
+        monthSelector.addEventListener('change', function(e) {
+            updateHeatmap(e.target.value);
+        });
+    });
+</script>
+{% endblock %}

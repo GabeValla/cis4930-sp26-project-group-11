@@ -1,0 +1,271 @@
+
+DocViewer
+Page
+of 8
+Pages
+Page 1
+Project Title: Full‑Stack Data Web Application with
+Django
+Group size: 3–4 students
+Weight: 12% of course grade
+Tools: Python, Django, pandas, SQLite (Django ORM), requests, Bootstrap 5, Chart.js,
+GitHub
+1. High‑Level Idea
+Each team builds a fully functioning Django web application that integrates their prior work
+from Projects 1 and 2 into a single, navigable website:
+• From Project 1: The dataset, EDA analysis, and visualizations become the analytics
+backbone of the site.
+• From Project 2: The API pipeline becomes a live data ingestion feature — a
+management command or view that fetches fresh data into the database.
+• Django: Ties it all together — models, views, templates, forms, Bootstrap UI, Chart.js
+charts, and production‑ready settings.
+The app must be a real, navigable website — not just scripts. Someone unfamiliar with the
+codebase should be able to install it, run it, and use it through a browser.
+Concrete scenario: Teams adapt their existing dataset and API from Projects 1 & 2 into the
+Django model layer, build CRUD pages for it, and add an analytics dashboard backed by
+pandas aggregations rendered as Chart.js charts.
+2. Technical Requirements
+2.1 Django Models & ORM
+Students must define at least 3 models in models.py that meaningfully represent their
+domain (e.g., for a weather dataset: City, WeatherRecord, DataRun). Requirements:
+• At least one ForeignKey relationship between models.
+• At least one field with choices or a custom validator.
+• Migrations tracked in git (makemigrations + migrate).
+• At least one model registered and customized in Django Admin (list_display,
+search_fields, list_filter).
+• Seed script or management command (management/commands/seed_data.py) that loads
+their Project 1 CSV data into the database using the ORM.
+Example pattern:
+Page 2
+class WeatherRecord(models.Model):
+city = models.ForeignKey(City, on_delete=models.CASCADE)
+date = models.DateField()
+temperature = models.FloatField()
+humidity = models.FloatField()
+source = models.CharField(max_length=50,
+choices=[('csv','CSV Import'),('api','API Fetch')])
+created_at = models.DateTimeField(auto_now_add=True)
+class Meta:
+ordering = ['-date']
+unique_together = ['city', 'date']
+2.2 URLs, Views & Templates
+Students must implement:
+• A homepage (/) with a brief description of the dataset and navigation links.
+• A list view (/records/) showing all records with pagination (at least 20 per page using
+Django’s Paginator).
+• A detail view (/records/<pk>/) for a single record.
+• A create view (/records/add/) with a ModelForm including validation.
+• An update view (/records/<pk>/edit/).
+• A delete view (/records/<pk>/delete/) with a confirmation page.
+• At least one template that extends base.html using {{% extends %}} and {{% block %}}.
+• At least one use of {{% for %}}, {{% if %}}, {{% url %}}, and {{% static %}} template
+tags.
+• Error‑handled 404 pages (use get_object_or_404).
+2.3 Bootstrap 5 UI
+All pages must use Bootstrap 5 (via CDN in base.html). Required Bootstrap components:
+• Responsive navbar with the app name, navigation links, and a mobile hamburger.
+• At least one Bootstrap table with table-striped table-hover on the list view.
+• Bootstrap form classes (form-control, form-label, btn) on all forms.
+• At least one Bootstrap card component on the homepage or detail view.
+• Custom static/css/style.css with at least 5 meaningful overrides (not just color
+changes — layout, spacing, or component customization).
+2.4 Analytics Dashboard
+Build an analytics view at /analytics/ that:
+• Uses pandas to compute at least 3 meaningful aggregations from the database records
+(via QuerySet.values() → DataFrame or pd.read_sql).
+Page 3
+• Renders at least 2 Chart.js charts using json.dumps() in the view and {{{{ var|safe
+}}}} in the template:
+n At least 1 bar or line chart (trend or category comparison).
+n At least 1 chart of a different type (pie, radar, doughnut, etc.).
+• Displays a summary statistics table (using Bootstrap table) with key numbers (count,
+mean, min, max for at least 2 numeric fields).
+• The analytics must directly reuse or extend the EDA questions answered in Project 1.
+Example view pattern:
+import json
+import pandas as pd
+from django.shortcuts import render
+from .models import WeatherRecord
+def analytics(request):
+qs = WeatherRecord.objects.values(
+'city__name', 'date', 'temperature', 'humidity')
+df = pd.DataFrame(list(qs))
+monthly_avg = df.groupby(
+df['date'].astype(str).str[:7])['temperature'].mean()
+chart_data = {
+'labels': monthly_avg.index.tolist(),
+'values': monthly_avg.values.tolist(),
+}
+return render(request, 'myapp/analytics.html', {
+'chart_json': json.dumps(chart_data),
+'summary': df.describe().to_dict(),
+})
+2.5 API Integration (from Project 2)
+Students must include a Django management command that calls their Project 2 API and
+saves results to the database:
+• Located at management/commands/fetch_data.py.
+• Callable via python manage.py fetch_data.
+• Must use requests with error handling (raise_for_status, try/except).
+• Must handle pagination or multiple API calls (same requirement as Project 2).
+• Must use the Django ORM to save records (using get_or_create or update_or_create to
+avoid duplicates).
+• A view or admin action at /fetch/ (POST only, staff‑only) that triggers the command
+in‑process using call_command.
+Example pattern:
+Page 4
+from django.core.management.base import BaseCommand
+from django.db import transaction
+import requests
+from myapp.models import WeatherRecord, City
+class Command(BaseCommand):
+help = 'Fetch latest data from the weather API'
+def handle(self, *args, **options):
+for city_name in ['Tallahassee', 'Miami', 'Orlando']:
+try:
+resp = requests.get(
+'https://api.open-meteo.com/v1/forecast',
+params={'latitude': ..., 'longitude': ...,
+'hourly': 'temperature_2m'},
+timeout=10)
+resp.raise_for_status()
+data = resp.json()
+city, _ = City.objects.get_or_create(
+name=city_name)
+with transaction.atomic():
+for i, temp in enumerate(
+data['hourly']['temperature_2m'][:24]):
+WeatherRecord.objects.update_or_create(
+city=city, date=...,
+defaults={'temperature': temp,
+'source': 'api'})
+self.stdout.write(f'Fetched {city_name}')
+except requests.exceptions.RequestException as e:
+self.stderr.write(f'Error: {e}')
+2.6 Settings, Security & Deployment Readiness
+• Split settings into config/settings/base.py, dev.py, prod.py.
+• Use python-decouple to manage SECRET_KEY, DEBUG, ALLOWED_HOSTS, and DATABASE_URL via
+a .env file.
+• .env added to .gitignore — no secrets in version control.
+• requirements.txt must be up to date (pip freeze > requirements.txt).
+• A Procfile and runtime.txt ready for Railway/Render deploy (gunicorn + whitenoise).
+• Run python manage.py check --deploy and include a screenshot or text output showing
+0 system‑critical errors in README.md.
+• BONUS (+5%): Actually deploy the app to Railway or Render and include the live URL in
+README.
+3. Project Deliverables (GitHub‑based)
+GitHub repo named cis4930-sp26-django-project-group-XX. Add instructor (Shifat11420
+(Shifat Mithila, Ph.D.) · GitHub) and TAs as collaborators (Ignore, if already done).
+Page 5
+3.1 README.md
+Must include:
+• Group member names and IDs.
+• Project title and 2–3 sentence description of the real‑world context (same dataset as
+Projects 1 & 2, or a related new one).
+• Link to original dataset and API documentation from prior projects.
+• An “Application features” section listing all implemented pages/views.
+• Setup instructions: git clone, pip install -r requirements.txt, python manage.py
+migrate, python manage.py seed_data, python manage.py runserver.
+• Screenshot(s) of at least 3 pages (homepage, list view, analytics dashboard).
+• manage.py check --deploy output (0 warnings).
+Page 6
+3.2 Project structure (minimum)
+myproject/
++-- config/
+| +-- settings/
+| | +-- base.py
+| | +-- dev.py
+| | +-- prod.py
+| +-- urls.py
+| +-- wsgi.py
++-- myapp/
+| +-- management/commands/
+| | +-- seed_data.py
+| | +-- fetch_data.py
+| +-- migrations/
+| +-- templates/myapp/
+| | +-- base.html
+| | +-- home.html
+| | +-- list.html
+| | +-- detail.html
+| | +-- form.html
+| | +-- confirm_delete.html
+| | +-- analytics.html
+| +-- static/
+| | +-- css/style.css
+| +-- models.py
+| +-- views.py
+| +-- forms.py
+| +-- urls.py
++-- data/
+| +-- raw/ <- same CSV from Project 1
++-- .env.example <- template with key names, no values
++-- .gitignore
++-- requirements.txt
++-- Procfile
++-- runtime.txt
++-- README.md
+3.3 Data continuity
+• The data/raw/ folder must contain the same dataset used in Project 1.
+• The seed_data management command must load this CSV into the database.
+• The analytics view must answer at least 2 of the same research questions from Project
+1’s README.
+3.4 Git collaboration evidence
+• Commits from all group members.
+• At least 4 feature branches (e.g., models-orm, crud-views, bootstrap-ui,
+analytics-dashboard, api-integration, settings-deploy).
+Page 7
+• Pull requests or merge commits visible in git history.
+4. Grading Rubric (12% total)
+Category Weight What is evaluated
+Django Models & ORM 20% Models defined correctly, ForeignKey, choices, migrations tracked,
+Admin customized, seed_data loads CSV
+Views, URLs &
+Templates
+20% All 6 pages work, template inheritance, correct use of template
+tags, 404 handling, pagination
+Bootstrap 5 UI 15% Responsive navbar, table classes, form classes, card components,
+custom CSS
+Analytics Dashboard 20% pandas aggregations from ORM, 2+ Chart.js charts, summary stats
+table, reuses Project 1 questions
+API Integration 15% fetch_data command works, error handling, pagination/batching,
+ORM save with get_or_create
+Settings & Deploy
+Readiness
+10% Split settings, python-decouple, .env not committed,
+requirements.txt, Procfile, check --deploy clean
+GitHub &
+Collaboration
+10% Commits from all members, feature branches, clean README with
+screenshots and setup instructions. −5% if secrets committed.
+5. Suggested Roles (can rotate)
+• Models & Data lead: Define models, write migrations, build seed_data command, load
+CSV.
+• Views & Templates lead: Implement all 6 CRUD views, URL routing, template
+inheritance.
+• Frontend lead: Bootstrap navbar/tables/forms, custom CSS, Chart.js charts in analytics
+template.
+• API & Analytics lead: Fetch data management command, pandas analytics view,
+summary stats.
+6. Suggested GitHub Workflow
+7. Create one GitHub repository per group under a consistent naming scheme (e.g.,
+cis4930-sp26-django-project-group-XX). Add your instructor (Shifat11420 (Shifat
+Mithila, Ph.D.) · GitHub) and TAs (TBA) as collaborators in your project (Ignore if
+already done).
+8. Use:
+n Branches for features (e.g., models-orm, crud-views, bootstrap-ui,
+analytics-dashboard).
+n Pull requests for code review within the group (optional but recommended).
+Page 8
+n Issues to track to‑dos (e.g., “Implement Django models”, “Add analytics charts”).
+• Commit regularly with meaningful messages.
+7. Open‑Ended Creativity Prompts (optional bonus, +5% max)
+“At least one part of your project should be completely your own idea.” Examples (not
+required):
+• Deploy to Railway or Render — include live URL in README.
+• Add user authentication (login/logout with django.contrib.auth) so only logged‑in
+users can create/edit/delete records.
+• Add a search bar on the list view using GET parameters and Q objects.
+• Add a second Chart.js chart type (scatter, radar, or bubble) not already required.
+• Add a simple REST API endpoint (/api/records/) returning JSON — manual
+JsonResponse, no DRF required.
+Annotations

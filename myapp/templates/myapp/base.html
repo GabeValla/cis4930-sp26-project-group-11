@@ -1,0 +1,60 @@
+{% load bootstrap5 static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TallyStats - A public safety and environmental dashboard for Tallahassee.">
+    <title>{% block title %}TallyStats: Crime & Weather Analytics{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS via django-bootstrap-v5 -->
+    {% bootstrap_css %}
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <strong>TallyStats</strong>
+            </a>
+            <button class="navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="False" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'records_list' %}">Incidents Database</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'analytics' %}">Analytics Dashboard</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <a href="{% url 'record_create' %}" class="btn btn-primary-custom text-white">Report Incident</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container mt-4 mb-5 pb-5">
+        {% bootstrap_messages %}
+        {% block content %}
+        {% endblock content %}
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    {% bootstrap_javascript %}
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
