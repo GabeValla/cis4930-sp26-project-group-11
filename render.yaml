@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: tallystats
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi:application"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tallystats-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DJANGO_SETTINGS_MODULE
+        value: "config.settings.prod"
+      - key: SECURE_SSL_REDIRECT
+        value: "True"
+
+databases:
+  - name: tallystats-db
+    databaseName: tallystats
+    user: tallystats
