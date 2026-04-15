@@ -63,6 +63,27 @@ def record_delete(request, pk):
         
     return render(request, 'myapp/confirm_delete.html', {'incident': incident})
 
+from django.conf import settings
+from django.http import JsonResponse
+from django.core.management import call_command
+from django.views.decorators.csrf import csrf_exempt
+import threading
+
+@csrf_exempt
+def trigger_fetch(request):
+    # Verify the security token
+    token = request.GET.get('token')
+    if not token or token != settings.CRON_FETCH_TOKEN:
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+    try:
+        # Spin up a thread so the HTTP request doesn't timeout waiting for the API to resolve
+        thread = threading.Thread(target=call_command, args=('fetch_data',))
+        thread.start()
+        return JsonResponse({'status': 'Fetch initiated successfully'}, status=200)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
 import json
 import pandas as pd
 
