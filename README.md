@@ -25,7 +25,8 @@ The Django application implements the following pages and features:
 - **Record Create View (`/records/add/`)**: A validated Form interface to report a new incident to the database.
 - **Record Update View (`/records/<pk>/edit/`)**: Interface to alter information about an existing record.
 - **Record Delete View (`/records/<pk>/delete/`)**: A safety confirmation screen prior to permanent database record deletion.
-- **Analytics Dashboard (`/analytics/`)**: Uses Chart.js to map both the most common incident types visually via a pie chart, and the frequency of calls over time chronologically via a line trend. It answers the initial Project 1 core research questions using Pandas aggregations.
+- **Analytics Dashboard (`/analytics/`)**: Uses Chart.js to map both the most common incident types visually via a doughnut chart, and employs `leaflet.js` with `leaflet-heat` to dynamically map geographical incident coordinates across the city for a given month. It answers the initial Project 1 core research questions using Pandas aggregations.
+- **Secure API Webhook (`/api/trigger-fetch/`)**: A hidden endpoint locked behind an environment variable validation token (`CRON_FETCH_TOKEN`). When pinged securely by an external cron service, it runs `fetch_data` autonomously in a background thread to continually bypass Render hibernation and sync fresh weather items.
 
 ## Setup Instructions
 
@@ -57,8 +58,8 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-5. **Seed the Local Database:**
-This retrieves exactly 10,000 rows from the 160K+ local processed file to ensure fast functionality. You can optionally modify `--limit 10000` to inject more or less.
+5. **Seed the Local Database (Optional):**
+Because we safely commit our `db.sqlite3` repository, running complex seeding logic is completely optional and the data will be instantly available upon clone! If you ever *do* want to wipe the slate and rebuild exactly 10,000 *randomly sampled uniform rows* from the 163K+ processed baseline file, you can utilize the management scripts:
 ```bash
 python manage.py seed_data --limit 10000
 python manage.py fetch_data
