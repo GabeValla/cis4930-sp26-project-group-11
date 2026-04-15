@@ -90,39 +90,51 @@ import pandas as pd
 def analytics(request):
     qs_crimes = CrimeIncident.objects.values('reason', 'latitude', 'longitude', 'date_time')
     df_crimes = pd.DataFrame(list(qs_crimes))
-    
+
     top_reasons_chart = {'labels': [], 'values': []}
     heatmap_data_by_month = {}
-    
+    incidents_over_time_chart = {'labels': [], 'values': []}
+
     if not df_crimes.empty:
+        df_crimes['date_time'] = pd.to_datetime(df_crimes['date_time'], errors='coerce')
+        df_crimes = df_crimes.dropna(subset=['date_time'])
+
         top_reasons = df_crimes['reason'].value_counts().head(10)
         top_reasons_chart = {
             'labels': top_reasons.index.tolist(),
             'values': top_reasons.values.tolist(),
         }
-        
-        # Prepare Coordinate Data for Heatmap
-        # First, ensure we have a month_year column
+
         df_crimes['month_year'] = df_crimes['date_time'].dt.strftime('%Y-%m')
-        
-        # Filter out rows with missing or 0 coordinates for safety
+
+        incidents_over_time = (
+            df_crimes.groupby(df_crimes['date_time'].dt.to_period('M'))
+            .size()
+            .sort_index()
+        )
+
+        incidents_over_time_chart = {
+            'labels': [str(x) for x in incidents_over_time.index],
+            'values': incidents_over_time.tolist(),
+        }
+
         df_coords = df_crimes.dropna(subset=['latitude', 'longitude'])
         df_coords = df_coords[(df_coords['latitude'] != 0) & (df_coords['longitude'] != 0)]
-        
+
         heatmap_data_by_month['All'] = df_coords[['latitude', 'longitude']].values.tolist()
         for month, group in df_coords.groupby('month_year'):
             heatmap_data_by_month[month] = group[['latitude', 'longitude']].values.tolist()
-        
+
     qs_weather = WeatherRecord.objects.values('temp_max', 'temp_min', 'precipitation', 'wind_speed_max')
     df_weather = pd.DataFrame(list(qs_weather))
-    
+
     summary_stats = {}
     if not df_weather.empty:
-        # describe returns metrics as index: count, mean, std, min, 25%, 50%, 75%, max
         summary_stats = df_weather.describe().round(2).to_dict()
-        
+
     context = {
         'top_reasons_json': json.dumps(top_reasons_chart),
+        'incidents_over_time_json': json.dumps(incidents_over_time_chart),
         'heatmap_data_by_month_json': json.dumps(heatmap_data_by_month),
         'available_months': list(heatmap_data_by_month.keys()),
         'summary_stats': summary_stats,

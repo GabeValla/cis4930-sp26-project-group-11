@@ -42,6 +42,18 @@
         </div>
     </div>
 </div>
+<!-- NEW ROW (separate from above) -->
+<div class="row">
+    <!-- Chart 3: Incidents Over Time -->
+    <div class="col-12 mb-4">
+        <div class="card card-custom h-100 p-3">
+            <h5 class="mb-3 text-center">Incidents Over Time</h5>
+            <div style="position: relative; height:350px; width:100%">
+                <canvas id="incidentsChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="row mt-4">
     <div class="col-12">
@@ -81,8 +93,7 @@
     document.addEventListener("DOMContentLoaded", function() {
         const topReasonsData = JSON.parse('{{ top_reasons_json|safe }}');
         const heatDataByMonth = JSON.parse('{{ heatmap_data_by_month_json|safe }}');
-        
-        // Context colors based on our custom styling palette
+        const incidentsData = JSON.parse('{{ incidents_over_time_json|default:"{}"|safe }}');        // Context colors based on our custom styling palette
         const primaryColor = '#2c3e50';
         const secondaryColor = '#18bc9c';
         const redColor = '#e74c3c';
@@ -144,6 +155,27 @@
         monthSelector.addEventListener('change', function(e) {
             updateHeatmap(e.target.value);
         });
-    });
+
+        // 3. Render Incidents Over Time Chart
+        const ctxIncidents = document.getElementById('incidentsChart').getContext('2d');
+
+        new Chart(ctxIncidents, {
+        type: 'line',
+        data: {
+            labels: incidentsData.labels,
+            datasets: [{
+                label: 'Incidents Per Month',
+                data: incidentsData.values,
+                borderColor: '#18bc9c',
+                backgroundColor: 'rgba(24, 188, 156, 0.2)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }});
+        });
 </script>
 {% endblock %}
