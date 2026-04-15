@@ -1,0 +1,92 @@
+/* TallyStats Custom Styles */
+
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #18bc9c;
+    --bg-color: #f8f9fa;
+    --card-bg: #ffffff;
+    --text-color: #333333;
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-color);
+}
+
+/* Override 1: Custom Navbar Styling */
+.navbar-custom {
+    background-color: var(--primary-color);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 1rem 2rem;
+}
+
+.navbar-custom .navbar-brand,
+.navbar-custom .nav-link {
+    color: #ffffff;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.navbar-custom .nav-link:hover {
+    color: var(--secondary-color);
+}
+
+/* Override 2: Card Component Styling */
+.card-custom {
+    border: none;
+    border-radius: 12px;
+    background-color: var(--card-bg);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-custom:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Override 3: Table Styling and Hover Effects */
+.table-custom thead th {
+    background-color: var(--primary-color);
+    color: white;
+    border-bottom: 2px solid var(--secondary-color);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.table-custom tbody tr:hover {
+    background-color: rgba(24, 188, 156, 0.05) !important;
+}
+
+/* Override 4: Primary Button Styling */
+.btn-primary-custom {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    border-radius: 8px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary-custom:hover {
+    background-color: #128f76;
+    border-color: #128f76;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(24, 188, 156, 0.3);
+}
+
+/* Override 5: Pagination Alignment and Colors */
+.pagination-custom .page-link {
+    color: var(--primary-color);
+    border-radius: 4px;
+    margin: 0 2px;
+    border: 1px solid #e9ecef;
+}
+
+.pagination-custom .page-item.active .page-link {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    color: white;
+}
