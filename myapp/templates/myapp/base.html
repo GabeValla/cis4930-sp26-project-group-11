@@ -40,7 +40,7 @@
                     </li>
                 </ul>
                 <form method="GET" action="{% url 'search_records' %}" class="d-flex me-3 gap-2">
-                    <input type="text" name="q" class="form-control" placeholder="Search by reason or location..." value="{{ request.GET.q }}" style="max-width: 300px;">
+                    <input type="text" name="q" class="form-control" placeholder="Search by reason or location..." value="{{ request.GET.q }}" style="max-width: 450px;">
                     <button type="submit" class="btn btn-outline-primary">Search</button>
                 </form>
                 <div class="d-flex">
