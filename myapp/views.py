@@ -108,6 +108,36 @@ def trigger_fetch(request):
 import json
 import pandas as pd
 
+def weather(request):
+    cities = City.objects.all()
+    weather_by_city = {}
+
+    for city in cities:
+        records = WeatherRecord.objects.filter(city=city).order_by('date').values(
+            'date', 'temp_max', 'temp_min', 'precipitation', 'wind_speed_max'
+        )
+        df = pd.DataFrame(list(records))
+        if df.empty:
+            continue
+        df['date'] = df['date'].astype(str)
+        weather_by_city[city.name] = {
+            'dates': df['date'].tolist(),
+            'temp_max': df['temp_max'].tolist(),
+            'temp_min': df['temp_min'].tolist(),
+            'precipitation': df['precipitation'].tolist(),
+            'wind_speed_max': df['wind_speed_max'].tolist(),
+            'avg_temp_max': round(df['temp_max'].mean(), 1),
+            'avg_temp_min': round(df['temp_min'].mean(), 1),
+            'total_precip': round(df['precipitation'].sum(), 1),
+            'avg_wind': round(df['wind_speed_max'].mean(), 1),
+        }
+
+    context = {
+        'weather_json': json.dumps(weather_by_city),
+        'cities': list(weather_by_city.keys()),
+    }
+    return render(request, 'myapp/weather.html', context)
+
 def analytics(request):
     qs_crimes = CrimeIncident.objects.values('reason', 'latitude', 'longitude', 'date_time')
     df_crimes = pd.DataFrame(list(qs_crimes))
