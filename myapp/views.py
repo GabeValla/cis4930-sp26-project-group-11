@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 from django.contrib import messages
+from django.db.models import Q
 from .models import CrimeIncident, WeatherRecord, City
 from .forms import CrimeIncidentForm
 
@@ -24,6 +25,26 @@ def records_list(request):
     page_obj = paginator.get_page(page_number)
     
     return render(request, 'myapp/list.html', {'page_obj': page_obj})
+
+def search_records(request):
+    query = request.GET.get('q', '')
+    page_number = request.GET.get('page')
+    
+    if query:
+        incident_list = CrimeIncident.objects.filter(
+            Q(reason__icontains=query) | Q(location__icontains=query)
+        ).order_by('-date_time')
+    else:
+        incident_list = CrimeIncident.objects.none()
+    
+    paginator = Paginator(incident_list, 20)  # Show 20 results per page
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'myapp/search_results.html', {
+        'page_obj': page_obj,
+        'query': query,
+        'total_results': paginator.count
+    })
 
 def record_detail(request, pk):
     incident = get_object_or_404(CrimeIncident, pk=pk)

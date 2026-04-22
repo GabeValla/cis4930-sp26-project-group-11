@@ -1,0 +1,85 @@
+{% extends 'myapp/base.html' %}
+{% load bootstrap5 %}
+
+{% block title %}Search Results - TallyStats{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="mb-3">Search Results</h2>
+    {% if query %}
+    <p class="text-muted">
+        Showing <strong>{{ total_results }}</strong> result{{ total_results|pluralize }} for "<strong>{{ query }}</strong>"
+    </p>
+    {% else %}
+    <p class="text-muted">Enter a search term above to find incidents.</p>
+    {% endif %}
+</div>
+
+{% if page_obj %}
+<div class="card card-custom p-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-custom table-striped table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Date & Time</th>
+                    <th>Reason</th>
+                    <th>Location</th>
+                    <th>City</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for incident in page_obj %}
+                <tr>
+                    <td>{{ incident.date_time|date:"M d, Y H:i" }}</td>
+                    <td><strong>{{ incident.reason }}</strong></td>
+                    <td>{{ incident.location|default:"-" }}</td>
+                    <td>{{ incident.city.name }}</td>
+                    <td class="text-end">
+                        <a href="{% url 'record_detail' incident.pk %}" class="btn btn-sm btn-outline-info">View</a>
+                        <a href="{% url 'record_edit' incident.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">No results found for "{{ query }}".</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination pagination-custom justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?q={{ query }}&page=1">&laquo; First</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?q={{ query }}&page={{ page_obj.previous_page_number }}">Previous</a>
+        </li>
+        {% endif %}
+
+        <li class="page-item active">
+            <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        </li>
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?q={{ query }}&page={{ page_obj.next_page_number }}">Next</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?q={{ query }}&page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% else %}
+<div class="card card-custom p-4 text-center">
+    <p class="text-muted mb-0">No results to display. Try searching for a specific reason or location.</p>
+</div>
+{% endif %}
+{% endblock %}
